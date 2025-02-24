@@ -15,6 +15,3 @@ This API provides a structured interface for managing online banking operations 
 ### Fund Transfers
 - **POST /transactions/transfer**: Initiate a fund transfer.
 - **GET /transactions/history**: Retrieve transaction history.
-
-## Validation
-The Swagger file has been validated using Swagger Editor. Below is a screenshot of the validation results:
