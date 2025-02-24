@@ -1,0 +1,221 @@
+openapi: 3.0.0
+info:
+  title: Online Banking API
+  version: 1.0.0
+  description: API for managing online banking operations such as user authentication, account management, and fund transfers.
+  contact:
+    email: support@bankapi.com
+
+servers:
+  - url: https://api.bank.com/v1
+    description: Production server
+
+security:
+  - BearerAuth: []
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+          example: "Invalid input"
+        message:
+          type: string
+          example: "The request body is invalid."
+        statusCode:
+          type: integer
+          example: 400
+
+paths:
+  /auth/login:
+    post:
+      summary: User login
+      description: Authenticate a user and return a JWT token.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                  example: "user123"
+                password:
+                  type: string
+                  example: "password123"
+      responses:
+        '200':
+          description: Successful login
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+                    example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+        '400':
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /auth/logout:
+    post:
+      summary: User logout
+      description: Log out the user and invalidate the JWT token.
+      responses:
+        '200':
+          description: Successful logout
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /accounts/{id}:
+    get:
+      summary: Retrieve account details
+      description: Get account details by ID.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    example: "12345"
+                  name:
+                    type: string
+                    example: "John Doe"
+                  balance:
+                    type: number
+                    example: 1000.50
+        '404':
+          description: Account not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    put:
+      summary: Update account information
+      description: Update account details by ID.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  example: "Jane Doe"
+      responses:
+        '200':
+          description: Account updated successfully
+        '400':
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /transactions/transfer:
+    post:
+      summary: Initiate a fund transfer
+      description: Transfer funds between accounts.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                fromAccountId:
+                  type: string
+                  example: "12345"
+                toAccountId:
+                  type: string
+                  example: "67890"
+                amount:
+                  type: number
+                  example: 100.00
+      responses:
+        '200':
+          description: Transfer successful
+        '400':
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Insufficient funds
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /transactions/history:
+    get:
+      summary: Retrieve transaction history
+      description: Get a list of transactions for the authenticated user.
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                      example: "txn123"
+                    amount:
+                      type: number
+                      example: 100.00
+                    date:
+                      type: string
+                      format: date-time
+                      example: "2025-02-22T12:34:56Z"
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
